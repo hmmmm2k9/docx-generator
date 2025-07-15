@@ -5,28 +5,26 @@ import os, uuid
 app = Flask(__name__)
 
 DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
-BASE_URL     = os.getenv("BASE_URL",   "https://docx-generator.onrender.com/downloads")
-
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def save_docx(filename: str, content: str) -> str:
     doc = Document()
     for line in content.splitlines():
         doc.add_paragraph(line)
-    unique = f"{uuid.uuid4().hex}_{filename}"
-    path   = os.path.join(DOWNLOAD_DIR, unique)
+    unique_name = f"{uuid.uuid4().hex}_{filename}"
+    path = os.path.join(DOWNLOAD_DIR, unique_name)
     doc.save(path)
-    return f"{BASE_URL}/{unique}"
+    return unique_name  # chỉ trả về tên file
 
-@app.post("/generate_docx")
-def generate():
+@app.route("/generate_docx", methods=["POST"])
+def generate_docx():
     data = request.get_json(force=True)
-    url  = save_docx(data["filename"], data["content"])
-    return jsonify({"url": url})
+    unique = save_docx(data["filename"], data["content"])
+    # Tự động lấy domain + /downloads
+    base = request.url_root.rstrip('/')         # e.g. "https://docx-generator-3wju.onrender.com"
+    download_url = f"{base}/downloads/{unique}"
+    return jsonify({"url": download_url}), 200
 
-@app.get("/downloads/<path:fname>")
+@app.route("/downloads/<path:fname>", methods=["GET"])
 def fetch(fname):
     return send_from_directory(DOWNLOAD_DIR, fname, as_attachment=True)
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
