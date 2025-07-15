@@ -4,7 +4,7 @@ import os, uuid
 
 app = Flask(__name__)
 
-DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", "/var/www/downloads")
+DOWNLOAD_DIR = os.path.join(os.getcwd(), "downloads")
 BASE_URL     = os.getenv("BASE_URL",   "https://docx-generator.onrender.com/downloads")
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
