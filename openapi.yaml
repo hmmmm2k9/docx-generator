@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: Docx Generator API
+  version: '1.0.0'
+
+servers:
+  - url: https://docx-generator.onrender.com       # ← tên miền API của thầy
+
+paths:
+  /generate_docx:
+    post:
+      operationId: generate_docx
+      summary: Sinh file Word (.docx) và trả về URL tải
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateDocxRequest'
+      responses:
+        '200':
+          description: URL tới file đã sinh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateDocxResponse'
+
+components:
+  schemas:
+    GenerateDocxRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Tên file (kết thúc .docx)
+        content:
+          type: string
+          description: Nội dung văn bản
+      required: [filename, content]
+
+    GenerateDocxResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
